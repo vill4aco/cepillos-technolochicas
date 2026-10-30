@@ -1,0 +1,31 @@
+image: node:20-alpine
+
+stages:
+  - build
+  - deploy
+
+variables:
+  GIT_STRATEGY: fetch
+
+build:
+  stage: build
+  script:
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 hour
+
+pages:
+  stage: deploy
+  dependencies:
+    - build
+  script:
+    - rm -rf public
+    - mv dist public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
